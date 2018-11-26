@@ -19,6 +19,13 @@ def draw_no_one(image):
 
     np.copyto(image, np.array(image_pil))
 
+def draw_on_tf_analysis(image, human_count):
+
+    # convert np array to image
+    image_pil = Image.fromarray(np.uint8(image)).convert('RGB')
+    _draw_text_on_image(image=image_pil, human_count=human_count, tf_analysis=True)
+
+    np.copyto(image, np.array(image_pil))
 
 # Receive image for drawing boxes on and convert to required PIL format
 def draw_boxes(image, ymin, xmin, ymax, xmax, color, thickness, display_str_list, human_count=0):
@@ -54,9 +61,9 @@ def _draw_bounding_box_on_image(image,
 # Draw people-count text on image
 # Takes image or draw object depending on whether image has already been drawn
 # on
-def _draw_text_on_image(image=None, draw=None, human_count=0):
+def _draw_text_on_image(image=None, draw=None, human_count=0, tf_analysis=False):
 
-    if human_count == 0:
+    if human_count == 0 or tf_analysis:
          draw = ImageDraw.Draw(image)
 
     if human_count == 1:

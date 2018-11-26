@@ -17,6 +17,7 @@ import cv2
 import numpy as np
 import tensorflow as tf
 import sys
+from image_labelling import draw_on_tf_analysis
 
 # This is needed since the notebook is stored in the object_detection folder.
 sys.path.append("..")
@@ -36,6 +37,8 @@ print(CWD_PATH)
 # MODEL_NAME = 'faster_rcnn_inception_v2_coco_2018_01_28'
 MODEL_NAME = 'ssd_mobilenet_v2_coco_2018_03_29'
 
+# determines how confident prediction must be before label can be applied
+SCORE_THRESHOLD = 0.6
 # Path to frozen detection graph .pb file, which contains the model that is used
 # for object detection.
 PATH_TO_CKPT = os.path.join(CWD_PATH,MODEL_NAME,'frozen_inference_graph.pb')
@@ -93,8 +96,8 @@ while(video.isOpened()):
         [detection_boxes, detection_scores, detection_classes, num_detections],
         feed_dict={image_tensor: frame_expanded})
 
-    print("boxes: ",boxes)
-    print("squeezed boxes: ",np.squeeze(boxes))
+    # print("boxes: ",boxes)
+    # print("squeezed boxes: ",np.squeeze(boxes))
     # Draw the results of the detection (aka 'visulaize the results')
     vis_util.visualize_boxes_and_labels_on_image_array(
         frame,
@@ -104,7 +107,17 @@ while(video.isOpened()):
         category_index,
         use_normalized_coordinates=True,
         line_thickness=8,
-        min_score_thresh=0.80)
+        min_score_thresh=SCORE_THRESHOLD)
+    print(np.squeeze(scores))
+
+    human_count = 0
+    for score in np.squeeze(scores):
+        if score > SCORE_THRESHOLD:
+            human_count += 1
+    print(human_count)
+    draw_on_tf_analysis(frame, human_count)
+
+
 
     # All the results have been drawn on the frame, so it's time to display it.
     cv2.imshow('Object detector', frame)
